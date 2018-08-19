@@ -73,24 +73,23 @@ def insertConceptToOfflineConcepts( conceptId, conceptUuid, conceptName ):
             db.commit()
             cursor.execute(query2)
             db.commit()
-        except:
-            print ""
+        except Exception as e: print(e)
         db.close();
 
 concepts = []
 
-def getAllConcepts(conceptId) :
+def getAllConcepts(conceptIds) :
     db = MySQLdb.connect("localhost","root","password","openmrs")
     cursor = db.cursor()
-    query = "select concept_id from concept_set where concept_set = "+str(conceptId)+";"
-    try:
-        cursor.execute(query)
-        results = cursor.fetchall();
-        for row in results:
-            concepts.append(row[0]);
-            getAllConcepts(row[0])
-    except:
-        print ""
+    for conceptId in conceptIds:
+        query = "select concept_id from concept_set where concept_set = "+str(conceptId)+";"
+        try:
+            cursor.execute(query)
+            results = cursor.fetchall();
+            for index in range(len(results)):
+                concepts.append(results[index][0]);
+                getAllConcepts(results[index])
+        except Exception as e:print(e)
 
 def getConceptDetails(conceptId) :
     conceptDetails = []
@@ -102,8 +101,7 @@ def getConceptDetails(conceptId) :
         results = cursor.fetchall()
         conceptDetails.append(results[0][0])
         conceptDetails.append(results[0][1])
-    except:
-        print ""
+    except Exception as e: print(e)
     return conceptDetails
 
 def execute() :
@@ -113,18 +111,20 @@ def execute() :
         name = conceptDetails[1].replace(" ", "+");
         insertConceptToOfflineConcepts(concepts[index], uuid, name)
 
-def getAllObsConceptId() :
-    query = "select DISTINCT concept_id from concept_name where name = 'All Observation Templates'"
+def getTopLevelParents() :
+    query = "select DISTINCT concept_id from concept_name where name = 'All Observation Templates' or name = 'Registration Offline Concepts'"
     db = MySQLdb.connect("localhost","root","password","openmrs")
     cursor = db.cursor()
+    topLevelParents = []
     try:
         cursor.execute(query)
         results = cursor.fetchall()
-    except:
-        print ""
-    return results[0][0]
+        for row in results:
+            topLevelParents.append(row[0])
+            concepts.append(row[0])
+    except Exception as e: print(e)
+    return topLevelParents
 
-allObsId = getAllObsConceptId()
-concepts.append(allObsId);
-getAllConcepts(allObsId)
+topLevelParents = getTopLevelParents()
+getAllConcepts(topLevelParents)
 execute()
