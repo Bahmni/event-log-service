@@ -1,4 +1,4 @@
-name: Build and Publish OpenELIS
+name: Build and Publish event-log-service
 on:
   push:
     branches:
@@ -17,11 +17,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Setup Java 7
+      - name: Setup Java 8
         uses: actions/setup-java@v2
         with:
           distribution: 'zulu'
-          java-version: '7'
+          java-version: '8'
       - name: Package war
         run: mvn clean install -U -DskipTests
       - uses: actions/upload-artifact@v3
