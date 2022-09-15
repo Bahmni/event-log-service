@@ -15,7 +15,7 @@ repositories {
 }
 
 group 'org.bahmni.eventLogService'
-version project.bahmniRelease
+version project.version
 
 apply plugin: 'java'
 
@@ -26,10 +26,10 @@ task extractWar(type: Copy) {
 }
 
 task normalizeJarName(type: Copy) {
-    from "${buildDir}" + "/libs/"
+    from "${projectDir}/resources/"
     into "${buildDir}" + "/libs/"
-    include(project.name + '-' + project.version + '-' + project.release '.jar')
-    rename(project.name + '-' + project.version + '-' + project.release  + '.jar', project.name '.jar')
+    include('core-1.0-SNAPSHOT.jar')
+    rename('core-1.0-SNAPSHOT.jar', project.name + '.jar')
 }
 
 ospackage {
@@ -113,10 +113,6 @@ buildRpm {
     preInstall file("${projectDir}/scripts/preinstall.sh")
     postInstall file("${projectDir}/scripts/postinstall.sh")
     preUninstall file("${projectDir}/scripts/preuninstall.sh")
-}
-
-dependencies {
-    compile project(":core")
 }
 
 jar {
