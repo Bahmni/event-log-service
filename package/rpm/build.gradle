@@ -28,8 +28,8 @@ task extractWar(type: Copy) {
 task normalizeJarName(type: Copy) {
     from "${buildDir}" + "/libs/"
     into "${buildDir}" + "/libs/"
-    include(project.name + '-' + project.bahmniRelease + '.jar')
-    rename(project.name + '-' + project.bahmniRelease + '.jar', project.name + '.jar')
+    include(project.name + '-' + project.version + '-' + project.release '.jar')
+    rename(project.name + '-' + project.version + '-' + project.release  + '.jar', project.name '.jar')
 }
 
 ospackage {
