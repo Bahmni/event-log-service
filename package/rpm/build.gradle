@@ -34,7 +34,8 @@ task normalizeJarName(type: Copy) {
 
 ospackage {
     packageName = 'bahmni-event-log-service'
-    release = System.getenv('GO_PIPELINE_COUNTER')
+    version = project.version
+    release = project.hasProperty('release') ? project.release : ""
     arch = NOARCH
     os = LINUX
     user = 'root'
