@@ -45,10 +45,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: event-log-service.war
-          path: event-log-service-webapp/target/
-      - name: Copying Artifacts to package/resources
-        run: |
-            cp event-log-service-webapp/target/event-log-service-webapp.war package/rpm/resources/
+          path: package/rpm/resources/
       - name: Setup Java 8 for Gradle
         uses: actions/setup-java@v3
         with:
