@@ -1,7 +1,9 @@
 package org.bahmni.module.eventlogservice.controller;
 
+import org.apache.log4j.Logger;
 import org.bahmni.module.eventlogservice.model.EventLog;
 import org.bahmni.module.eventlogservice.repository.EventLogRepository;
+import org.bahmni.module.eventlogservice.scheduler.jobs.EventLogPublisherJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +13,7 @@ import java.util.*;
 @RequestMapping("/rest/eventlog")
 public class EventLogController {
     private EventLogRepository eventLogRepository;
+    private static Logger logger = org.apache.log4j.Logger.getLogger(EventLogPublisherJob.class);
 
     @Autowired
     public EventLogController(EventLogRepository eventLogRepository) {
@@ -28,12 +31,27 @@ public class EventLogController {
     private Map<String, Object> getEventsExcept(@RequestParam(value = "uuid", required = false) String uuid, @RequestParam(value = "filterBy", required = true) String[] filterBy, List<String> categoryList) {
         Map<String, Object> response = new HashMap();
         if (uuid == null) {
-            response.put("events", eventLogRepository.findTop100ByFilterInAndCategoryNotIn(Arrays.asList(filterBy), categoryList));
-            response.put("pendingEventsCount", eventLogRepository.countByFilterInAndCategoryNotIn(Arrays.asList(filterBy), categoryList));
+            List<EventLog> events = new ArrayList<EventLog>();
+            for(String filter: filterBy) {
+                events.addAll(eventLogRepository.findTop100ByFilterContainsAndCategoryNotIn(filter, categoryList));
+            }
+            response.put("events", events);
+            response.put("pendingEventsCount", events.size());
         } else {
             EventLog lastReadEventLog = eventLogRepository.findTop1ByUuid(uuid);
-            response.put("events", eventLogRepository.findTop100ByFilterInAndIdAfterAndCategoryNotIn(Arrays.asList(filterBy), lastReadEventLog.getId(), categoryList));
-            response.put("pendingEventsCount", eventLogRepository.countByFilterInAndIdAfterAndCategoryNotIn(Arrays.asList(filterBy), lastReadEventLog.getId(), categoryList));
+            List<EventLog> events = new ArrayList<EventLog>();
+            if (null != lastReadEventLog) {
+                for (String filter : filterBy) {
+                    events.addAll(eventLogRepository.findTop100ByFilterContainsAndIdAfterAndCategoryNotIn(filter, lastReadEventLog.getId(), categoryList));
+                }
+            }
+            else{
+                logger.error("System is Not Able to find passed UUID in DataBase.");
+            }
+
+            response.put("events", events);
+            response.put("pendingEventsCount", events.size());
+
         }
         return response;
     }

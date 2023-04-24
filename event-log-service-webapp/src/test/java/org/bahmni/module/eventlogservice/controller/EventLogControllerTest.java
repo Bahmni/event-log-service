@@ -42,19 +42,25 @@ public class EventLogControllerTest {
         EventLog lastReadEventLog = new EventLog();
         lastReadEventLog.setId(1000);
         when(eventLogRepository.findTop1ByUuid(uuid)).thenReturn(lastReadEventLog);
-        when(eventLogRepository.findTop100ByFilterInAndIdAfterAndCategoryNotIn(filtersList, lastReadEventLog.getId(), categoryList)).thenReturn(eventLogs);
-        when(eventLogRepository.countByFilterInAndIdAfterAndCategoryNotIn(filtersList, lastReadEventLog.getId(), categoryList)).thenReturn(1);
+        for(String filter: filterBy) {
+            when(eventLogRepository.findTop100ByFilterContainsAndIdAfterAndCategoryNotIn(filter, lastReadEventLog.getId(), categoryList)).thenReturn(eventLogs);
+        }
+
+//        when(eventLogRepository.countByFilterInAndIdAfterAndCategoryNotIn(filtersList, lastReadEventLog.getId(), categoryList)).thenReturn(1);
 
         Map<String, Object> response = eventLogController.getEvents("encounter", uuid, filterBy);
         List<EventLog> events = (List<EventLog>) response.get("events");
         Integer pendingEventsCount = (Integer) response.get("pendingEventsCount");
 
         verify(eventLogRepository, times(1)).findTop1ByUuid(uuid);
-        verify(eventLogRepository, times(1)).findTop100ByFilterInAndIdAfterAndCategoryNotIn(filtersList, lastReadEventLog.getId(), categoryList);
-        verify(eventLogRepository, never()).findTop100ByFilterInAndCategoryNotIn(any(List.class), anyList());
-        verify(eventLogRepository, times(1)).countByFilterInAndIdAfterAndCategoryNotIn(filtersList, lastReadEventLog.getId(), categoryList);
+        for(String filter: filterBy) {
+            verify(eventLogRepository, times(1)).findTop100ByFilterContainsAndIdAfterAndCategoryNotIn(filter, lastReadEventLog.getId(), categoryList);
+        }
+
+        verify(eventLogRepository, never()).findTop100ByFilterContainsAndCategoryNotIn(any(String.class), anyList());
+//        verify(eventLogRepository, times(1)).countByFilterInAndIdAfterAndCategoryNotIn(filtersList, lastReadEventLog.getId(), categoryList);
         assertNotNull(events);
-        assertEquals(1, pendingEventsCount.intValue());
+        assertEquals(events.size(), pendingEventsCount.intValue());
     }
 
     @Test
@@ -70,19 +76,25 @@ public class EventLogControllerTest {
         EventLog lastReadEventLog = new EventLog();
         lastReadEventLog.setId(1000);
         when(eventLogRepository.findTop1ByUuid(uuid)).thenReturn(lastReadEventLog);
-        when(eventLogRepository.findTop100ByFilterInAndIdAfterAndCategoryNotIn(filtersList, lastReadEventLog.getId(), categoryList)).thenReturn(eventLogs);
-        when(eventLogRepository.countByFilterInAndIdAfterAndCategoryNotIn(filtersList, lastReadEventLog.getId(), categoryList)).thenReturn(1);
+        for(String filter: filterBy) {
+            when(eventLogRepository.findTop100ByFilterContainsAndIdAfterAndCategoryNotIn(filter, lastReadEventLog.getId(), categoryList)).thenReturn(eventLogs);
+        }
+
+//        when(eventLogRepository.countByFilterInAndIdAfterAndCategoryNotIn(filtersList, lastReadEventLog.getId(), categoryList)).thenReturn(1);
 
         Map<String, Object> response = eventLogController.getEvents("patient", uuid, filterBy);
         List<EventLog> events = (List<EventLog>) response.get("events");
         Integer pendingEventsCount = (Integer) response.get("pendingEventsCount");
 
         verify(eventLogRepository, times(1)).findTop1ByUuid(uuid);
-        verify(eventLogRepository, times(1)).findTop100ByFilterInAndIdAfterAndCategoryNotIn(filtersList, lastReadEventLog.getId(), categoryList);
-        verify(eventLogRepository, never()).findTop100ByFilterInAndCategoryNotIn(any(List.class), anyList());
-        verify(eventLogRepository, times(1)).countByFilterInAndIdAfterAndCategoryNotIn(filtersList, lastReadEventLog.getId(), categoryList);
+        for(String filter: filterBy) {
+            verify(eventLogRepository, times(1)).findTop100ByFilterContainsAndIdAfterAndCategoryNotIn(filter, lastReadEventLog.getId(), categoryList);
+        }
+
+        verify(eventLogRepository, never()).findTop100ByFilterContainsAndCategoryNotIn(any(String.class), anyList());
+//        verify(eventLogRepository, times(1)).countByFilterInAndIdAfterAndCategoryNotIn(filtersList, lastReadEventLog.getId(), categoryList);
         assertNotNull(events);
-        assertEquals(1, pendingEventsCount.intValue());
+        assertEquals(events.size(), pendingEventsCount.intValue());
     }
 
     @Test
@@ -111,24 +123,30 @@ public class EventLogControllerTest {
     @Test
     public void shouldGetAllEncounterEventLogExcludingCategoriesForTheFirstTime() throws Exception {
         String[] filterBy = new String[]{"0303020", "30302001"};
-        List<String> filtersList = Arrays.asList(filterBy);
+//        List<String> filtersList = Arrays.asList(filterBy);
         List<String> categoryList = new ArrayList<String>();
         categoryList.add("addressHierarchy");
         categoryList.add("patient");
         ArrayList<EventLog> eventLogs = new ArrayList<EventLog>();
-        when(eventLogRepository.findTop100ByFilterInAndCategoryNotIn(filtersList, categoryList)).thenReturn(eventLogs);
-        when(eventLogRepository.countByFilterInAndCategoryNotIn(filtersList, categoryList)).thenReturn(1);
+        for(String filter: filterBy) {
+            when(eventLogRepository.findTop100ByFilterContainsAndCategoryNotIn(filter, categoryList)).thenReturn(eventLogs);
+        }
+
+//        when(eventLogRepository.countByFilterInAndCategoryNotIn(filtersList, categoryList)).thenReturn(1);
 
         Map<String, Object> response = eventLogController.getEvents("encounter", null, filterBy);
         List<EventLog> events = (List<EventLog>) response.get("events");
         Integer pendingEventsCount = (Integer) response.get("pendingEventsCount");
 
+        for(String filter: filterBy) {
+            verify(eventLogRepository, times(1)).findTop100ByFilterContainsAndCategoryNotIn(filter, categoryList);
+        }
 
-        verify(eventLogRepository, times(1)).findTop100ByFilterInAndCategoryNotIn(filtersList, categoryList);
         verify(eventLogRepository, never()).findTop1ByUuid(anyString());
-        verify(eventLogRepository, never()).findTop100ByFilterInAndIdAfterAndCategoryNotIn(any(List.class), anyInt(), anyList());
+        verify(eventLogRepository, never()).findTop100ByFilterContainsAndIdAfterAndCategoryNotIn(any(String.class), anyInt(), anyList());
         assertNotNull(events);
-        assertEquals(1, pendingEventsCount.intValue());
+        assertEquals(events.size(), pendingEventsCount.intValue());
+
     }
 
     @Test
@@ -139,19 +157,23 @@ public class EventLogControllerTest {
         categoryList.add("addressHierarchy");
         categoryList.add("Encounter");
         ArrayList<EventLog> eventLogs = new ArrayList<EventLog>();
-        when(eventLogRepository.findTop100ByFilterInAndCategoryNotIn(filtersList, categoryList)).thenReturn(eventLogs);
-        when(eventLogRepository.countByFilterInAndCategoryNotIn(filtersList, categoryList)).thenReturn(1);
+        for(String filter: filterBy) {
+            when(eventLogRepository.findTop100ByFilterContainsAndCategoryNotIn(filter, categoryList)).thenReturn(eventLogs);
+        }
+
+//        when(eventLogRepository.countByFilterInAndCategoryNotIn(filtersList, categoryList)).thenReturn(1);
 
         Map<String, Object> response = eventLogController.getEvents("patient", null, filterBy);
         List<EventLog> events = (List<EventLog>) response.get("events");
         Integer pendingEventsCount = (Integer) response.get("pendingEventsCount");
 
-
-        verify(eventLogRepository, times(1)).findTop100ByFilterInAndCategoryNotIn(filtersList, categoryList);
+        for(String filter: filterBy) {
+            verify(eventLogRepository, times(1)).findTop100ByFilterContainsAndCategoryNotIn(filter, categoryList);
+        }
         verify(eventLogRepository, never()).findTop1ByUuid(anyString());
-        verify(eventLogRepository, never()).findTop100ByFilterInAndIdAfterAndCategoryNotIn(any(List.class), anyInt(), anyList());
+        verify(eventLogRepository, never()).findTop100ByFilterContainsAndIdAfterAndCategoryNotIn(any(String.class), anyInt(), anyList());
         assertNotNull(events);
-        assertEquals(1, pendingEventsCount.intValue());
+        assertEquals(events.size(), pendingEventsCount.intValue());
     }
 
 
@@ -306,5 +328,27 @@ public class EventLogControllerTest {
     @Test(expected = RuntimeException.class)
     public void shouldThrowExceptionWhenFilterByHasMultipleFilters() throws Exception {
         eventLogController.getAddressHierarchyEvents("uuid3", new String[]{"2020", "202020"});
+    }
+
+    @Test
+    public void shouldNotGetEncounterEventLogExcludingCategoriesIfUUIDNotPresentInDatabase() throws Exception {
+        String uuid = "uuid1";
+        String[] filterBy = new String[]{"0303020", "30302001"};
+
+        List<String> categoryList = new ArrayList<String>();
+        categoryList.add("addressHierarchy");
+        categoryList.add("patient");
+        ArrayList<EventLog> eventLogs = new ArrayList<EventLog>();
+        when(eventLogRepository.findTop1ByUuid(uuid)).thenReturn(null);
+
+        Map<String, Object> response = eventLogController.getEvents("encounter", uuid, filterBy);
+        List<EventLog> events = (List<EventLog>) response.get("events");
+        Integer pendingEventsCount = (Integer) response.get("pendingEventsCount");
+
+        
+        verify(eventLogRepository, times(1)).findTop1ByUuid(uuid);
+
+        assertNotNull(events);
+        assertEquals(events.size(), pendingEventsCount.intValue());
     }
 }
