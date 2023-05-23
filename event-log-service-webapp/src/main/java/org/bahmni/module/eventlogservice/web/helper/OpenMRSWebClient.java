@@ -15,7 +15,14 @@ public class OpenMRSWebClient {
     protected ConnectionDetails connectionDetails;
 
     public String get(URI uri) {
-        return httpClient.get(uri);
+        String response;
+        try{
+           response = httpClient.get(uri);
+        }
+        catch(Exception e){
+            throw new RuntimeException("Http request failed: "+ e);
+        }
+        return response;
     }
 
     @Autowired
